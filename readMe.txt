@@ -22,22 +22,22 @@
 
 配置文件(cecheTable.json)说明: 
 			1.配置文件是一个json文件。所有需要缓存的表都以对象的形式保存在一个列表里面。
-				例:        [
-				                {
-				                    "table": "activity_staff",
-				                    "expire":-1,
-				                    "key_prefix": "activity_staff",
-				                    "key_field": [ "activity_id" ] ,
-				                    "value_field":[ "staff_id" ] ,
-				                    "value_type": "set"
-				                },
-				                {
-				                    "table": "users",
-				                    "key_prefix": "user",
-				                    "value_field":[ "id" ] ,
-				                    "value_type": "set"
-				                }
-				           ]
+				例:     [
+							{
+								"table": "activity_staff",
+								"expire":-1,
+								"key_prefix": "activity_staff",
+								"key_field": [ "activity_id" ] ,
+								"value_field":[ "staff_id" ] ,
+								"value_type": "set"
+							},
+							{
+								"table": "users",
+								"key_prefix": "user",
+								"value_field":[ "id" ] ,
+								"value_type": "set"
+							}
+						]
 			2.缓存表包含上述这些字段，其中"table","key_prefix","value_field",和"value_type"是必填的
 			"expire"和"key_field"是选填的, "key_field"默认[],expire在key_field为[]或者为["id"]时默认为-1，
 			在其他情况默认为6个小时(因为其他情况无法删除缓存数据。必须设置缓存时间).
@@ -45,7 +45,8 @@
 			3.对每个字段的介绍如下:
 
 				table(string)           
-				代表需要存到redis缓存中对应pg数据库中的表名,要求必须和pg数据库中的表名一致,不然程序在操作触发器的时候会出现问题!
+				代表需要存到redis缓存中对应pg数据库中的表名,要求必须和pg数据库中的表名一致,
+				不然程序在操作触发器的时候会出现问题!
 
 				expire(number)          
 				代表数据在redis中的缓存时间(单位是秒)，如果不写,在key_field为[]或者为["id"]时默认为-1，
@@ -131,18 +132,18 @@
 			(如果没有创建，那么在运行程序后,程序会自动创建)
 				监听器函数创建如下(基本不需要改动):
 				`CREATE OR REPLACE FUNCTION notify_change() RETURNS TRIGGER AS $$
-								BEGIN
-									IF    (TG_OP = 'INSERT') THEN 
-									PERFORM pg_notify(TG_RELNAME || '_chan', 'I' || NEW.id); RETURN NEW;
-									ELSIF (TG_OP = 'UPDATE') THEN 
-									PERFORM pg_notify(TG_RELNAME || '_chan', 'U' || NEW.id); RETURN NEW;
-									ELSIF (TG_OP = 'DELETE') THEN 
-									PERFORM pg_notify(TG_RELNAME || '_chan', 'D' || OLD.id); RETURN OLD;
-									END IF;
-								END; $$ LANGUAGE plpgsql SECURITY DEFINER;`
+					BEGIN
+						IF    (TG_OP = 'INSERT') THEN 
+						PERFORM pg_notify(TG_RELNAME || '_chan', 'I' || NEW.id); RETURN NEW;
+						ELSIF (TG_OP = 'UPDATE') THEN 
+						PERFORM pg_notify(TG_RELNAME || '_chan', 'U' || NEW.id); RETURN NEW;
+						ELSIF (TG_OP = 'DELETE') THEN 
+						PERFORM pg_notify(TG_RELNAME || '_chan', 'D' || OLD.id); RETURN OLD;
+						END IF;
+					END; $$ LANGUAGE plpgsql SECURITY DEFINER;`
 									
 			3.对需要缓存的数据表(每一个需要缓存的表都需要) 需要创建监听器(${table}代表对应的表名):
-			  `CREATE TRIGGER t_${table}_notify AFTER INSERT OR UPDATE OR DELETE ON ${table} FOR EACH ROW EXECUTE PROCEDURE notify_change();`
+			`CREATE TRIGGER t_${table}_notify AFTER INSERT OR UPDATE OR DELETE ON ${table} FOR EACH ROW EXECUTE PROCEDURE notify_change();`
 				
 			4.运行 ./start.sh 启动程序(如果表对应的监听器不存在,那么程序会自动创建触发器,
 			如果对应的表不存在,那么监听器会创建失败！程序虽然不会停止但是对应表的数据将无法保存到redis中)
@@ -165,7 +166,7 @@
 				检查的过程实际上是去postgres数据库中根据触发器函数名('notify_change')查pg_proc表，这是postgres用于保存函数的表
 				
 				3.checkTrigger      
-				检查数据表对应的触发器是否存在,接收的参数是：postgres.client和 tableName ---需要缓存的表名(以循环的方式从cacheTable中获得)
+				检查数据表对应的触发器是否存在,接收的参数是：postgres.client和 tableName(需要缓存的表名)
 				
 				4.listening         
 				用于监听触发器，当发生了I/U/D事件，那么监听到数据发生更改,并且把数据交给cacheUp函数
