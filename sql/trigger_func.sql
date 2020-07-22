@@ -1,0 +1,11 @@
+-- 通知触发器函数
+CREATE OR REPLACE FUNCTION notify_change() RETURNS TRIGGER AS $$
+BEGIN
+  IF    (TG_OP = 'INSERT') THEN 
+	PERFORM pg_notify(TG_RELNAME || '_chan', 'I' || NEW.id); RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN 
+	PERFORM pg_notify(TG_RELNAME || '_chan', 'U' || NEW.id); RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN 
+	PERFORM pg_notify(TG_RELNAME || '_chan', 'D' || OLD.id); RETURN OLD;
+  END IF;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;

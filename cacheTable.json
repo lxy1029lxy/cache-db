@@ -1,0 +1,26 @@
+[
+	{
+		"table": "activity_staff",
+		"expire":600,
+		"key_prefix": "activity_staff",
+		"key_field": [ "id","activity_id" ] ,
+		"value_field":[ "staff_id" ] ,
+		"value_type": "set"
+	},
+	{
+		"table": "users",
+		"key_prefix": "user",
+		"key_field": ["id"] ,
+		"value_field":[ "name","age"  ] ,
+		"value_type": "hash"
+	},
+	{
+		"table": "users",
+		"expire":666,
+		"key_prefix": "user_name",
+		"key_field":["name"],
+		"value_field":[ "id","age","name" ] ,
+		"value_type": "string"
+	}
+
+]

@@ -1,0 +1,22 @@
+{
+  "name": "cache_db2.0",
+  "version": "1.0.0",
+  "description": "需求:利用postgres监听器实现postgres-redis缓存同步",
+  "main": "index.js",
+  "dependencies": {
+    "ioredis": "^4.17.3",
+    "log4js": "^6.3.0",
+    "pg": "^8.3.0",
+    "redis": "^3.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.isecsp.com:9922/yz/yz-pg-redis-sync.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
